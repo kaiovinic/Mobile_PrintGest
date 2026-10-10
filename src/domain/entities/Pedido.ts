@@ -65,9 +65,19 @@ export interface PedidoDetalhe {
   pagamentos: PedidoPagamentoDetalhe[];
 }
 
+export interface ResultadoPaginado<T> {
+  itens: T[];
+  total: number;
+  pagina: number;
+  tamanhoPagina: number;
+  totalPaginas: number;
+}
+
 export interface PedidoFiltroParams {
   status?: string;
-  busca?: string;
+  cliente?: string;
+  inicio?: string;
+  fim?: string;
   pagina?: number;
-  limite?: number;
+  tamanhoPagina?: number;
 }

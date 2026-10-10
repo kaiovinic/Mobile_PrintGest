@@ -12,9 +12,10 @@ const FILTROS_STATUS = [
 
 export default function PedidosScreen() {
   const [statusFiltro, setStatusFiltro] = useState('');
-  const { data: pedidos = [], isLoading, refetch, isRefetching } = usePedidosQuery({
+  const { data: rawPedidos, isLoading, refetch, isRefetching } = usePedidosQuery({
     status: statusFiltro || undefined,
   });
+  const pedidos = Array.isArray(rawPedidos) ? rawPedidos : [];
 
   return (
     <View className="flex-1 bg-slate-50">

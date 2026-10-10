@@ -4,12 +4,13 @@ import { usePedidosQuery } from '@/features/pedidos/hooks/usePedidosQuery';
 import { formatarMoeda } from '@/core/utils/formatters';
 
 export default function DashboardScreen() {
-  const { data: pedidos = [], isLoading } = usePedidosQuery();
+  const { data: rawPedidos, isLoading } = usePedidosQuery();
+  const pedidos = Array.isArray(rawPedidos) ? rawPedidos : [];
 
   const totalPedidos = pedidos.length;
-  const emAberto = pedidos.filter((p) => String(p.status) === 'Aberto').length;
-  const orcados = pedidos.filter((p) => String(p.status) === 'Orcado').length;
-  const faturamentoTotal = pedidos.reduce((acc, p) => acc + p.total, 0);
+  const emAberto = pedidos.filter((p) => String(p?.status).toLowerCase() === 'aberto').length;
+  const orcados = pedidos.filter((p) => String(p?.status).toLowerCase() === 'orcado').length;
+  const faturamentoTotal = pedidos.reduce((acc, p) => acc + (p?.total || 0), 0);
 
   return (
     <ScrollView className="flex-1 bg-slate-50 p-4">

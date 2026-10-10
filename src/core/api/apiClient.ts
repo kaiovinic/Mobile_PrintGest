@@ -2,8 +2,10 @@ import { ApiError } from './apiError';
 import { StorageAdapter } from '../storage/storageAdapter';
 import { secureStorage } from '../storage/secureStorage';
 
+import { STORAGE_KEYS } from '../storage/storageKeys';
+
 const DEFAULT_BASE_URL = 'http://10.0.2.2:5285/api'; // IP padrão Emulador Android para a porta HTTP da API .NET (launchSettings.json: 5285)
-const AUTH_TOKEN_KEY = 'printgest:user';
+const AUTH_TOKEN_KEY = STORAGE_KEYS.USER;
 
 export class HttpClient {
   constructor(

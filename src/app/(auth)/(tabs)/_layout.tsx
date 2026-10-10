@@ -2,17 +2,22 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { LayoutDashboard, ClipboardList, Users, User } from 'lucide-react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#2563EB',
         tabBarInactiveTintColor: '#64748B',
         tabBarStyle: {
+          backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E2E8F0',
-          height: 60,
-          paddingBottom: 8,
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
           paddingTop: 8,
         },
         headerStyle: {

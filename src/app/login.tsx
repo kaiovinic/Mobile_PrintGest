@@ -5,6 +5,7 @@ import { LoginForm } from '@/features/auth/components/LoginForm';
 import { LoginFormData } from '@/features/auth/schemas/loginSchema';
 import { authService } from '@/features/auth/services/authService';
 import { secureStorage } from '@/core/storage/secureStorage';
+import { STORAGE_KEYS } from '@/core/storage/storageKeys';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const user = await authService.login(data);
-      await secureStorage.setItem('printgest:user', JSON.stringify(user));
+      await secureStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
       router.replace('/(auth)/(tabs)');
     } catch (err: any) {
       Alert.alert('Erro de Autenticação', err.message || 'E-mail ou senha incorretos.');
