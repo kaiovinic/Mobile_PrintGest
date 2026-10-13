@@ -10,6 +10,16 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
 }), { virtual: true });
 
+// lucide-react-native é distribuído como ESM; nos testes cada ícone não renderiza nada.
+jest.mock('lucide-react-native', () =>
+  new Proxy(
+    {},
+    {
+      get: (_alvo, nome) => (nome === '__esModule' ? true : () => null),
+    }
+  )
+);
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     push: jest.fn(),

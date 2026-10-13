@@ -1,11 +1,18 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { usePedidosQuery } from '@/features/pedidos/hooks/usePedidosQuery';
+import { usePedidosRecentesQuery } from '@/features/pedidos/hooks/usePedidosRecentesQuery';
+import { PedidoCard } from '@/features/pedidos/components/PedidoCard';
 import { formatarMoeda } from '@/core/utils/formatters';
+
+const QUANTIDADE_RECENTES = 10;
 
 export default function DashboardScreen() {
   const { data: rawPedidos, isLoading } = usePedidosQuery();
   const pedidos = Array.isArray(rawPedidos) ? rawPedidos : [];
+
+  const { data: rawRecentes, isLoading: carregandoRecentes } = usePedidosRecentesQuery();
+  const recentes = (Array.isArray(rawRecentes) ? rawRecentes : []).slice(0, QUANTIDADE_RECENTES);
 
   const totalPedidos = pedidos.length;
   const emAberto = pedidos.filter((p) => String(p?.status).toLowerCase() === 'aberto').length;
@@ -43,6 +50,23 @@ export default function DashboardScreen() {
           Baseado em {totalPedidos} registros cadastrados
         </Text>
       </View>
+
+      <Text className="text-lg font-extrabold text-slate-900 mb-1">Pedidos recentes</Text>
+      <Text className="text-xs text-slate-500 mb-3">
+        Pedidos em aberto e orçamentos, do mais novo para o mais antigo
+      </Text>
+
+      {carregandoRecentes ? (
+        <ActivityIndicator color="#2563EB" className="my-6" />
+      ) : recentes.length === 0 ? (
+        <View className="bg-white p-6 rounded-xl border border-slate-200 items-center mb-4">
+          <Text className="text-sm text-slate-500 text-center">
+            Nenhum pedido em aberto no momento.
+          </Text>
+        </View>
+      ) : (
+        recentes.map((pedido) => <PedidoCard key={pedido.id} pedido={pedido} />)
+      )}
     </ScrollView>
   );
 }

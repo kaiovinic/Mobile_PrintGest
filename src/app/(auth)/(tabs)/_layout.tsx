@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { LayoutDashboard, ClipboardList, Users, User } from 'lucide-react-native';
+import { LayoutDashboard, ClipboardList, Truck, Users, User } from 'lucide-react-native';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -43,6 +43,14 @@ export default function TabLayout() {
           title: 'Pedidos',
           headerTitle: 'Fila de Produção',
           tabBarIcon: ({ color, size }) => <ClipboardList color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="entregas"
+        options={{
+          title: 'Entregas',
+          headerTitle: 'Próximas Entregas',
+          tabBarIcon: ({ color, size }) => <Truck color={color} size={size} />,
         }}
       />
       <Tabs.Screen

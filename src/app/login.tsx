@@ -1,27 +1,36 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 import { LoginFormData } from '@/features/auth/schemas/loginSchema';
-import { authService } from '@/features/auth/services/authService';
+import { useLoginMutation } from '@/features/auth/hooks/useLoginMutation';
 import { secureStorage } from '@/core/storage/secureStorage';
 import { STORAGE_KEYS } from '@/core/storage/storageKeys';
+import { ApiError } from '@/core/api/apiError';
+import { apiClient } from '@/core/api/apiClient';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const { mutate: entrar, isPending } = useLoginMutation();
 
-  const handleLogin = async (data: LoginFormData) => {
-    setLoading(true);
-    try {
-      const user = await authService.login(data);
-      await secureStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-      router.replace('/(auth)/(tabs)');
-    } catch (err: any) {
-      Alert.alert('Erro de Autenticação', err.message || 'E-mail ou senha incorretos.');
-    } finally {
-      setLoading(false);
-    }
+  const handleLogin = (data: LoginFormData) => {
+    entrar(data, {
+      onSuccess: async (user) => {
+        await secureStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+        router.replace('/(auth)/(tabs)');
+      },
+      onError: (err) => {
+        // Sem ApiError não houve resposta do servidor: é falha de rede, não de senha.
+        if (err instanceof ApiError) {
+          Alert.alert('Erro de Autenticação', err.message);
+        } else {
+          Alert.alert(
+            'Falha de conexão',
+            `Não foi possível falar com o servidor em ${apiClient.getBaseUrl()}.\n\n${err?.message ?? ''}`
+          );
+        }
+      },
+    });
   };
 
   return (
@@ -39,7 +48,7 @@ export default function LoginScreen() {
 
         <View className="bg-white rounded-2xl p-6 shadow-md">
           <Text className="text-xl font-bold text-slate-900 mb-4">Acessar Conta</Text>
-          <LoginForm onSubmit={handleLogin} loading={loading} />
+          <LoginForm onSubmit={handleLogin} loading={isPending} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

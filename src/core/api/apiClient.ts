@@ -1,10 +1,24 @@
+import Constants from 'expo-constants';
 import { ApiError } from './apiError';
 import { StorageAdapter } from '../storage/storageAdapter';
 import { secureStorage } from '../storage/secureStorage';
 
 import { STORAGE_KEYS } from '../storage/storageKeys';
 
-const DEFAULT_BASE_URL = 'http://10.0.2.2:5285/api'; // IP padrão Emulador Android para a porta HTTP da API .NET (launchSettings.json: 5285)
+const PORTA_API = 5285; // porta HTTP da API .NET (launchSettings.json)
+const HOST_EMULADOR_ANDROID = '10.0.2.2'; // alias do emulador para o localhost da máquina
+
+// O Metro roda na mesma máquina que a API, então o host dele serve de endereço
+// para ambos: IP da rede no celular físico, e o alias acima no emulador.
+function resolverBaseUrl(): string {
+  const hostDoMetro = Constants.expoConfig?.hostUri?.split(':')[0];
+  const alcancavelPelaRede =
+    hostDoMetro && hostDoMetro !== 'localhost' && hostDoMetro !== '127.0.0.1';
+
+  return `http://${alcancavelPelaRede ? hostDoMetro : HOST_EMULADOR_ANDROID}:${PORTA_API}/api`;
+}
+
+const DEFAULT_BASE_URL = resolverBaseUrl();
 const AUTH_TOKEN_KEY = STORAGE_KEYS.USER;
 
 export class HttpClient {
@@ -15,6 +29,10 @@ export class HttpClient {
 
   public setBaseUrl(url: string) {
     this.baseUrl = url;
+  }
+
+  public getBaseUrl(): string {
+    return this.baseUrl;
   }
 
   private async getAuthToken(): Promise<string | null> {

@@ -37,6 +37,17 @@ export class PedidoService {
     return response.itens;
   }
 
+  // Traz pedidos em aberto e orçamentos, dos mais novos para os mais antigos.
+  async listarRecentes(): Promise<PedidoResumo[]> {
+    return this.client.request<PedidoResumo[]>('/pedidos/recentes');
+  }
+
+  // Pedidos em aberto com data de entrega definida, ordenados pela entrega mais próxima.
+  async listarPendentesEntrega(atendente?: string): Promise<PedidoResumo[]> {
+    const query = atendente ? `?atendente=${encodeURIComponent(atendente)}` : '';
+    return this.client.request<PedidoResumo[]>(`/pedidos/pendentes-entrega${query}`);
+  }
+
   async obterPorId(id: number): Promise<PedidoDetalhe> {
     return this.client.request<PedidoDetalhe>(`/pedidos/${id}`);
   }
