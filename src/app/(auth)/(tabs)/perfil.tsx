@@ -3,8 +3,7 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button } from '@/shared/components/ui/Button';
 import { Badge } from '@/shared/components/ui/Badge';
-import { secureStorage } from '@/core/storage/secureStorage';
-import { STORAGE_KEYS } from '@/core/storage/storageKeys';
+import { authSession } from '@/core/auth/authSession';
 import { AuthUser } from '@/domain/entities/Usuario';
 import { User, Mail, ShieldCheck } from 'lucide-react-native';
 
@@ -14,23 +13,14 @@ export default function PerfilScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadUser() {
-      try {
-        const raw = await secureStorage.getItem(STORAGE_KEYS.USER);
-        if (raw) {
-          setUser(JSON.parse(raw) as AuthUser);
-        }
-      } catch (err) {
-        console.error('Erro ao carregar dados do usuário:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadUser();
+    authSession
+      .obter()
+      .then(setUser)
+      .finally(() => setLoading(false));
   }, []);
 
   const handleLogout = async () => {
-    await secureStorage.removeItem(STORAGE_KEYS.USER);
+    await authSession.encerrar();
     router.replace('/login');
   };
 

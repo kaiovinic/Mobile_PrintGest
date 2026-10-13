@@ -1,9 +1,6 @@
 import Constants from 'expo-constants';
 import { ApiError } from './apiError';
-import { StorageAdapter } from '../storage/storageAdapter';
-import { secureStorage } from '../storage/secureStorage';
-
-import { STORAGE_KEYS } from '../storage/storageKeys';
+import { AuthSession, authSession } from '../auth/authSession';
 
 const PORTA_API = 5285; // porta HTTP da API .NET (launchSettings.json)
 const HOST_EMULADOR_ANDROID = '10.0.2.2'; // alias do emulador para o localhost da máquina
@@ -19,12 +16,11 @@ function resolverBaseUrl(): string {
 }
 
 const DEFAULT_BASE_URL = resolverBaseUrl();
-const AUTH_TOKEN_KEY = STORAGE_KEYS.USER;
 
 export class HttpClient {
   constructor(
     private baseUrl: string = DEFAULT_BASE_URL,
-    private storage: StorageAdapter = secureStorage
+    private session: AuthSession = authSession
   ) {}
 
   public setBaseUrl(url: string) {
@@ -35,15 +31,10 @@ export class HttpClient {
     return this.baseUrl;
   }
 
+  // Só devolve token de sessão ainda válida — expirada é descartada na origem.
   private async getAuthToken(): Promise<string | null> {
-    try {
-      const raw = await this.storage.getItem(AUTH_TOKEN_KEY);
-      if (!raw) return null;
-      const user = JSON.parse(raw) as { accessToken?: string };
-      return user.accessToken ?? null;
-    } catch {
-      return null;
-    }
+    const user = await this.session.obter();
+    return user?.accessToken ?? null;
   }
 
   public async request<T>(
@@ -65,6 +56,11 @@ export class HttpClient {
     });
 
     if (!response.ok) {
+      // Token recusado pelo servidor: não adianta guardá-lo para a próxima chamada.
+      if (response.status === 401 && token) {
+        await this.session.encerrar();
+      }
+
       const errorMessage = await this.readErrorMessage(response);
       throw new ApiError(errorMessage, response.status);
     }

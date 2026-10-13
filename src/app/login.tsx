@@ -4,8 +4,7 @@ import { useRouter } from 'expo-router';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 import { LoginFormData } from '@/features/auth/schemas/loginSchema';
 import { useLoginMutation } from '@/features/auth/hooks/useLoginMutation';
-import { secureStorage } from '@/core/storage/secureStorage';
-import { STORAGE_KEYS } from '@/core/storage/storageKeys';
+import { authSession } from '@/core/auth/authSession';
 import { ApiError } from '@/core/api/apiError';
 import { apiClient } from '@/core/api/apiClient';
 
@@ -16,7 +15,7 @@ export default function LoginScreen() {
   const handleLogin = (data: LoginFormData) => {
     entrar(data, {
       onSuccess: async (user) => {
-        await secureStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+        await authSession.salvar(user);
         router.replace('/(auth)/(tabs)');
       },
       onError: (err) => {
