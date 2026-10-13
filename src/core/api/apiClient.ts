@@ -5,9 +5,16 @@ import { AuthSession, authSession } from '../auth/authSession';
 const PORTA_API = 5285; // porta HTTP da API .NET (launchSettings.json)
 const HOST_EMULADOR_ANDROID = '10.0.2.2'; // alias do emulador para o localhost da máquina
 
-// O Metro roda na mesma máquina que a API, então o host dele serve de endereço
-// para ambos: IP da rede no celular físico, e o alias acima no emulador.
-function resolverBaseUrl(): string {
+// Em build standalone não existe Metro, então a URL precisa vir da configuração —
+// sem ela o app cairia no alias do emulador e não falaria com nada.
+// Em desenvolvimento, o host do Metro aponta para a mesma máquina que roda a API:
+// IP da rede no celular físico, e o alias acima no emulador.
+export function resolverBaseUrl(): string {
+  const configurada = process.env.EXPO_PUBLIC_API_URL;
+  if (configurada) {
+    return configurada.replace(/\/$/, '');
+  }
+
   const hostDoMetro = Constants.expoConfig?.hostUri?.split(':')[0];
   const alcancavelPelaRede =
     hostDoMetro && hostDoMetro !== 'localhost' && hostDoMetro !== '127.0.0.1';

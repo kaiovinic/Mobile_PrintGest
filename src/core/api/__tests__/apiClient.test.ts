@@ -16,6 +16,25 @@ function carregarModulo(hostUri?: string) {
 describe('resolução da URL base da API', () => {
   afterEach(() => {
     jest.dontMock('expo-constants');
+    delete process.env.EXPO_PUBLIC_API_URL;
+  });
+
+  // Em build standalone não há Metro; sem esta precedência o app sairia
+  // apontando para o alias do emulador e não falaria com nada.
+  it('deve priorizar a URL configurada sobre o host do Metro', () => {
+    process.env.EXPO_PUBLIC_API_URL = 'https://printgest.printimpressoes.com.br/api';
+
+    expect(carregarModulo('192.168.200.11:8081').apiClient.getBaseUrl()).toBe(
+      'https://printgest.printimpressoes.com.br/api'
+    );
+  });
+
+  it('deve remover a barra final da URL configurada', () => {
+    process.env.EXPO_PUBLIC_API_URL = 'https://printgest.printimpressoes.com.br/api/';
+
+    expect(carregarModulo().apiClient.getBaseUrl()).toBe(
+      'https://printgest.printimpressoes.com.br/api'
+    );
   });
 
   // Regressão: no celular físico 10.0.2.2 não existe — é alias do emulador.
